@@ -1,0 +1,91 @@
+---
+layout: page
+title: RStudio Trainer Program
+subtitle: "Tidyverse: Predictive Model - Lecture Note"
+author:
+    name: xwMOOC
+    url: https://www.facebook.com/groups/tidyverse/
+    affiliation: Tidyverse Korea
+date: "`r Sys.Date()`"
+output:
+  html_document: 
+    toc: yes
+    toc_float: true
+    highlight: tango
+    code_folding: show
+    number_section: true
+    self_contained: true
+editor_options: 
+  chunk_output_type: console
+---
+ 
+``` {r, include=FALSE}
+# source("tools/chunk-options.R")
+
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE,
+                    comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+
+```
+
+# Lecture Note {#RStudio-lecture-note}
+
+- Identify the target variable
+- Perform EDA
+- Visualize relationships
+
+# One Country {#RStudio-lecture-note-one}
+
+## Dataframe {#RStudio-lecture-note-df}
+
+```{r gapminder}
+library(tidyverse)
+library(gapminder)
+
+korea_tbl <- gapminder %>% 
+  filter(str_detect(country, "Korea, Rep.")) %>% 
+  select(year, pop, gdpPercap, lifeExp)
+  
+DT::datatable(korea_tbl)
+```
+
+## Visualize a relation {#gapminder-visualize-relation}
+
+```{r gapminder-one-visualize}
+korea_tbl %>% 
+  ggplot(aes(x=gdpPercap, y=lifeExp)) +
+    geom_point() +
+    geom_line() +
+    labs(x="GDP per capita", 
+         y="Life Expectancy", 
+         title="Relationship between GDP per Capita and Life Expectancy")
+```
+
+## Visualize many relations {#gapminder-visualize-relations}
+
+```{r gapminder-one-visualize-many}
+korea_tbl %>% 
+  gather(variable, value, -lifeExp) %>% 
+  ggplot(aes(x=value, y=lifeExp)) +
+    geom_point() +
+    geom_line() +
+    facet_wrap(~variable) 
+```
+
+```{r gapminder-one-visualize-many-decoration}
+korea_tbl %>% 
+  gather(variable, value, -lifeExp) %>% 
+  ggplot(aes(x=value, y=lifeExp)) +
+    geom_point() +
+    geom_line() +
+    facet_wrap(~variable, scale = "free") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+        labs(x="", 
+             y="Life Expectancy",
+             title="Relationship between Life Expectancy and main factors")
+```
+
+hint: [stackoverflow, "Rotating and spacing axis labels in ggplot2"](https://stackoverflow.com/questions/1330989/rotating-and-spacing-axis-labels-in-ggplot2)
+
+
+
+
