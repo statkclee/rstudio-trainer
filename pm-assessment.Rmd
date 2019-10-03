@@ -1,0 +1,69 @@
+---
+layout: page
+title: RStudio Trainer Program
+subtitle: "Tidyverse: Predictive Model - Assessment"
+author:
+    name: xwMOOC
+    url: https://www.facebook.com/groups/tidyverse/
+    affiliation: Tidyverse Korea
+date: "`r Sys.Date()`"
+output:
+  html_document: 
+    toc: yes
+    toc_float: true
+    highlight: tango
+    code_folding: show
+    number_section: true
+    self_contained: true
+editor_options: 
+  chunk_output_type: console
+---
+ 
+``` {r, include=FALSE}
+# source("tools/chunk-options.R")
+
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE,
+                    comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+
+```
+
+# Multiple Choice Question {#assessment-multiple-choice}
+
+Carefully look at `gapminder` dataset. We are going to build the world class predictive model? Which variable can be target variable?
+
+1. country
+1. continent  
+1. year 
+1. lifeExp      
+1. pop gdpPercap
+
+Hint: ["What Is the Most Important Thing in Life?"](https://www.pinchofattitude.com/what-is-the-most-important-thing-in-life/)
+
+```{r gapminder-multiple-choice}
+library(gapminder)
+
+gapminder
+```
+
+
+# Parsons Problems {#assessment-parsons-problem}
+
+- Use `gapminder` dataframe
+- Group by `continent` and `country`, and then `nest()`
+- Fit simple linear regression by each country through `mutate()`, `map()` pattern
+- Extract $R^2$ values from list-columns
+- Arrange country by $R^2$ values
+
+
+```{r gapminder-parsons, eval=FALSE}
+gapminder %>% 
+  group_by(continent, ____) %>% 
+  ____ %>% 
+  mutate(model = map(____, ~lm(lifeExp ~ year, data=.))) %>% 
+  mutate(model_glance = map(model, ____),
+         rsquare = map_dbl(model_glance, ~.$r.squared)) %>% 
+  arrange(_____))
+
+```
+
+
