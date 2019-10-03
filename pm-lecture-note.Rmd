@@ -33,7 +33,7 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE,
 - Perform EDA
 - Visualize relationships
 
-# One Country {#RStudio-lecture-note-one}
+# One Country - Data {#RStudio-lecture-note-one}
 
 ## Dataframe {#RStudio-lecture-note-df}
 
@@ -43,7 +43,8 @@ library(gapminder)
 
 korea_tbl <- gapminder %>% 
   filter(str_detect(country, "Korea, Rep.")) %>% 
-  select(year, pop, gdpPercap, lifeExp)
+  dplyr::select(year, pop, gdpPercap, lifeExp) %>% 
+  mutate(pop = pop / 10^6)
   
 DT::datatable(korea_tbl)
 ```
@@ -87,5 +88,108 @@ korea_tbl %>%
 hint: [stackoverflow, "Rotating and spacing axis labels in ggplot2"](https://stackoverflow.com/questions/1330989/rotating-and-spacing-axis-labels-in-ggplot2)
 
 
+# One Country - Model {#RStudio-lecture-note-one-lm}
 
+```{r gapminder-lm}
+korea_lm <- lm(lifeExp ~ year, data=korea_tbl)
+summary(korea_lm)
+```
 
+## Introduce `broom` {#RStudio-lecture-note-one-lm-broom}
+
+```{r gapminder-lm-summary}
+library(broom)
+glance(korea_lm)
+tidy(korea_lm)
+augment(korea_lm) %>% 
+  select(.resid) %>% 
+  summary(.)
+```
+
+## One Country - Model with multiple variables {#RStudio-lecture-note-one-lm-variables}
+
+```{r gapminder-lm-variable}
+korea_multiple_lm <- lm(lifeExp ~ ., data=korea_tbl)
+
+glance(korea_multiple_lm)
+tidy(korea_multiple_lm)
+```
+
+## One Country - Best Model Selection {#RStudio-lecture-note-one-lm-best}
+
+```{r gapminder-lm2-best}
+korea_full_lm <- lm(lifeExp ~ ., data = korea_tbl)
+korea_step <- MASS::stepAIC(korea_full_lm, trace = FALSE)
+korea_step
+```
+
+# Many Simple Models {#RStudio-lecture-note-many-simple}
+
+```{r gapminder-lm-many-models}
+gap_nest <- gapminder %>% 
+  select(-continent) %>% 
+  group_by(country) %>% 
+  nest()
+
+## Hello model
+(gap_many_tbl <- gap_nest %>% 
+  mutate(model = map(data, ~lm(lifeExp ~ year, data=.))) %>% 
+  mutate(model_glance = map(model, broom::glance),
+         rsquare = map_dbl(model_glance, ~.$r.squared)) %>% 
+  arrange(rsquare))
+```
+
+## Let's visualize best and worst {#RStudio-lecture-note-worst-best}
+
+```{r gapminder-lm-many-models-best-worst}
+worst_country <- gap_many_tbl %>% 
+  pull(country) %>% 
+  head(3) %>% 
+  as.character()
+
+best_country <- gap_many_tbl %>% 
+  pull(country) %>% 
+  tail(3) %>% 
+  as.character()
+
+countries <- c(worst_country, best_country)
+
+gapminder %>% 
+  filter(country %in% countries) %>% 
+  mutate(country = as.character(country)) %>% 
+  select(country, year, lifeExp) %>% 
+  mutate(country = fct_relevel(country, countries)) %>% 
+  mutate(worst_best = if_else(country %in% best_country, "Best", "Worst")) %>% 
+  ggplot(aes(x=year, y=lifeExp, color=worst_best)) +
+    geom_point() +
+    geom_line() +
+    facet_wrap(~country, scale = "free") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+        labs(x="", 
+             y="Life Expectancy",
+             title="Relationship between Life Expectancy and main factors")
+
+```
+
+## One more thing {#RStudio-lecture-note-worst-best-one-more}
+
+```{r gapminder-lm-many-models-best-worst-one-more}
+gap_many_tbl %>% 
+  select(country, data, rsquare) %>% 
+  filter(country %in% countries) %>% 
+  unnest(data) %>% 
+  ungroup() %>% 
+  mutate(country = as.character(country)) %>% 
+  select(country, year, lifeExp, rsquare) %>% 
+  mutate(country = fct_relevel(country, countries)) %>% 
+  mutate(country = glue::glue("{country}, {round(rsquare, 3)}")) %>% 
+  ggplot(aes(x=year, y=lifeExp)) +
+    geom_point() +
+    geom_line() +
+    facet_wrap(~country, scale = "free") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+        labs(x="", 
+             y="Life Expectancy",
+             title="Relationship between Life Expectancy and main factors",
+             color="")
+```
