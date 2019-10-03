@@ -31,6 +31,6 @@ library(tidyverse)
 # Concept map {#RStudio-concept-map}
 
 
-
+![Many Models' Concept Map](img/pm-concept-map.png){#id .class width="100%"}
 
 
