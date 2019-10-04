@@ -1,0 +1,91 @@
+---
+layout: page
+title: RStudio Trainer Program
+subtitle: "Tidyverse: Split-Apply-Combine - Lecture Note"
+author:
+    name: xwMOOC
+    url: https://www.facebook.com/groups/tidyverse/
+    affiliation: Tidyverse Korea
+date: "`r Sys.Date()`"
+output:
+  html_document: 
+    toc: yes
+    toc_float: true
+    highlight: tango
+    code_folding: show
+    number_section: true
+    self_contained: true
+editor_options: 
+  chunk_output_type: console
+---
+ 
+``` {r, include=FALSE}
+# source("tools/chunk-options.R")
+
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE,
+                    comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+
+```
+
+# Lecture Note [^sac-reference] {#RStudio-lecture-note-sac}
+
+[^sac-reference]: [R 병렬 프로그래밍 - "분할-적용-병합(Split-Apply-Combine) 전략"](https://statkclee.github.io/parallel-r/r-parallel-split-apply-combine.html)
+
+- Split-Apply-Combine Strategy
+- Brute force programming
+- Old fashioned Split-Apply-Combine
+- `purrr` Split-Apply-Combine
+
+# Brute force programming {#RStudio-lecture-note-brute-force}
+
+```{r sac-brute}
+library(tidyverse)
+
+iris_tbl <- iris %>% as_tibble()
+
+# calculate `Sepal.Length` mean by Species
+species_v <- iris_tbl %>% 
+  pull(Species) %>% 
+  unique() %>% 
+  as.character()
+
+sepal_length_mean <- c()
+
+for(i in seq_along(species_v)) {
+  species_tmp <- iris_tbl %>% filter(Species == species_v[i])
+  sepal_length_mean[i] <- species_tmp %>% summarise(mean(Sepal.Length)) %>% pull
+}
+
+sepal_length_mean
+```
+
+# Old fashioned Split-Apply-Combine {#RStudio-lecture-note-sac}
+
+```{r sac-brute-sac}
+# normal function
+calc_mean <- function(df) {
+  mean_val <- mean(df$`Sepal.Length`)
+}
+
+iris_split <- split(iris_tbl, iris_tbl$Species)
+
+lapply(iris_split, calc_mean)
+
+# lambda function ----
+# lapply(iris_split, function(x) mean(x$`Sepal.Length`))
+```
+
+# `purrr` Split-Apply-Combine {#RStudio-lecture-note-purrr}
+
+```{r sac-brute-purrr}
+# dplyr verbs
+iris_tbl %>% 
+  group_by(Species) %>% 
+  summarise(mean_sepal_length = mean(`Sepal.Length`))
+
+# group_by, nest, mutate, map pattern
+iris_tbl %>% 
+  group_by(Species) %>% 
+  nest() %>% 
+  mutate(mean_sepal_length = map_dbl(data, ~mean(.$`Sepal.Length`)))
+```

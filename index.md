@@ -18,6 +18,11 @@ title: RStudio Trainer Tutorial
     - [Concept map](pm-concept.html)
     - [Two formative assessments & Parsons Problems](pm-assessment.html)
     - [Lecture Note](pm-lecture-note.html)
+1. Split-Apply-Combine Strategy
+    - [Learner persona](sac-persona.html)
+    - [Concept map](sac-concept.html)
+    - [Two formative assessments & Parsons Problems](sac-assessment.html)
+    - [Lecture Note](sac-lecture-note.html)
 
 ## Reference
 
