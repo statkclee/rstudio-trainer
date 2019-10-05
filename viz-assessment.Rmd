@@ -1,0 +1,88 @@
+---
+layout: page
+title: RStudio Trainer Program
+subtitle: "Tidyverse: Visualization - Assessment"
+author:
+    name: xwMOOC
+    url: https://www.facebook.com/groups/tidyverse/
+    affiliation: Tidyverse Korea
+date: "`r Sys.Date()`"
+output:
+  html_document: 
+    toc: yes
+    toc_float: true
+    highlight: tango
+    code_folding: show
+    number_section: true
+    self_contained: true
+editor_options: 
+  chunk_output_type: console
+---
+ 
+``` {r, include=FALSE}
+# source("tools/chunk-options.R")
+
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE,
+                    comment="", digits = 3, tidy = FALSE, prompt = FALSE, fig.align = 'center')
+
+```
+
+# Multiple Choice Question {#viz-multiple-choice}
+
+Why do we need visualization?
+
+1. We can communicate visual artifacts with aspect ratio.
+1. We can reduce cognitive load through visualization. 
+1. Anscombe’s Quartet dataset provides rationals on why we always visualize a dataset.
+1. Because we have three different visual systems(Base, ggplot, lattice) in R, we need a visualization.
+
+Hint: [데이터 과학 - "시각화 (Visualization) 개요"](https://statkclee.github.io/viz/viz.html)
+
+
+# Parsons Problems {#viz-parsons-problem}
+
+<div class = "row">
+  <div class = "col-md-4">
+**Instruction**
+
+- Import `trelliscopejs` library
+- Filter out only "Americas" from continent and then group by `continent` and `country`, and then `nest()`
+- Write `plot_ly` function named `lifeExp_plot` to visualize year and lifeExp
+- Generate `trelliscopeJS` small **many** graphs using `map_plot()` and save list-column dataframe called `gapminder_plot_df`
+- Visualize `gapminder_plot_df`
+
+  </div>
+  <div class = "col-md-8">
+**Write Code**
+
+```{r gapminder-viz, eval=FALSE}
+library(____)
+
+## list-column dataset
+gapminder_nest <- gapminder %>% 
+  filter(continent == "Americas") %>% 
+  group_by(continent, country) %>% 
+  ____()
+
+## plotly graph function
+lifeExp_plot <- function(df) {
+    ____(df, x = ~year, y = ~lifeExp) %>% 
+    add_markers() %>% 
+    add_lines()
+}
+
+## Generate trelliscopeJS interactive graph 
+gapminder_plot_df <- gapminder_nest %>% 
+  mutate(panel = map_plot(data, ____))
+
+trelliscope(____,
+            name = "gapminder", nrow = 2, ncol = 3)
+
+```
+
+  </div>
+</div>
+
+
+
+
