@@ -108,3 +108,113 @@ library(plotly)
 ggplotly(life_p)
 ```
 
+## `tooltip` {#viz-interactive-tooltip}
+
+```{r interactive-ggplot-tooltip}
+tooltip_p <- gapminder %>% 
+     ggplot(aes(x=year, y=lifeExp, 
+                group=country, 
+                text=paste0("Continent: ", continent, "\n", 
+                            "Country: ", country, "\n", 
+                            "Life Expectancy: ", lifeExp))) + 
+     geom_line()
+ 
+ggplotly(tooltip_p, tooltip = "text")
+```
+
+
+## Highlight {#viz-interactive-highlight}
+
+```{r interactive-ggplot-highlight}
+lifeExp_highlight <- highlight_key(gapminder, ~country)
+
+highlight_p <- lifeExp_highlight %>% 
+     ggplot(aes(x=year, y=lifeExp, 
+                group=country, 
+                text=paste0("Continent: ", continent, "\n", 
+                            "Country: ", country, "\n", 
+                            "Life Expectancy: ", lifeExp))) + 
+     geom_line()
+ 
+highlight_gg <- ggplotly(highlight_p, tooltip = "text")
+
+highlight(highlight_gg, on = "plotly_click",
+          selectize = TRUE,
+          dynamic = TRUE,
+          persistent = TRUE)
+```
+
+## Shared Link {#viz-interactive-sharedlink}
+
+```{r interactive-ggplot-sharedlink}
+life_cjk <- gapminder %>% 
+    filter(country %in% c("China", "Japan", "Korea, Rep.")) %>% 
+    ggplot(aes(x=year, y=lifeExp, group=country, 
+             text=paste0("Continent: ", continent, "\n", 
+                         "Country: ", country, "\n", 
+                         "Life Expectancy: ", lifeExp))) + 
+    geom_line() +
+    geom_point() +
+    facet_wrap(~country)
+
+ggplotly(life_cjk, tooltip = "text")
+```
+
+## Shared Link - `htmlwidgets` {#viz-interactive-sharedlink-htmlwidgets}
+
+```{r interactive-ggplot-sharedlink-hetero}
+gapminder_cjk <- gapminder %>% 
+  filter(country %in% c("China", "Japan", "Korea, Rep."))
+
+gapminder_sd <- crosstalk::SharedData$new(gapminder_cjk)
+
+## life expectancy by year
+life_cjk <- gapminder_sd %>% 
+  plot_ly(x = ~year, y= ~lifeExp, color=~country) %>% 
+    add_markers() %>% 
+    add_lines() %>% 
+    highlight("plotly_selected", dynamic = TRUE)
+
+gdp_cjk <- gapminder_sd %>% 
+  plot_ly(x = ~gdpPercap, y= ~lifeExp) %>% 
+    add_histogram2d() %>% 
+    highlight("plotly_selected", dynamic = TRUE)
+
+## bind two hetergeneous plots
+crosstalk::bscols(life_cjk, gdp_cjk)
+```
+
+# Animation {#gapminder-animation}
+
+```{r interactive-ggplot-animation}
+life_g <- gapminder %>% 
+  ggplot(aes(x=gdpPercap, y=lifeExp, group=country, color=country, 
+             text=paste0("Continent: ", continent, "\n", 
+                         "Country: ", country, "\n", 
+                         "Life Expectancy: ", lifeExp))) + 
+    geom_point(aes(frame=year), color="red") +
+    geom_point(alpha=0.2) +
+    facet_wrap(~continent, ncol=2) +
+    scale_x_sqrt() +
+    theme(legend.position = "none")
+
+ggplotly(life_g, tooltip = "text")
+```
+
+## `gganimate` `transition_time()` {#gapminder-gganimate}
+
+```{r gapminder-gganimate}
+library(gganimate)
+gapminder %>% 
+  ggplot(aes(x=gdpPercap, y=lifeExp, group=country, color=country, 
+             text=paste0("Continent: ", continent, "\n", 
+                         "Country: ", country, "\n", 
+                         "Life Expectancy: ", lifeExp))) + 
+    geom_point(aes(size=gdpPercap)) +
+    facet_wrap(~continent, ncol=2) +
+    scale_x_sqrt() +
+    theme(legend.position = "none") +
+    transition_time(year) +
+    labs(title = "Year: {frame_time}")
+```
+
