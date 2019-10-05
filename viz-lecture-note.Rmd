@@ -14,7 +14,7 @@ output:
     highlight: tango
     code_folding: show
     number_section: true
-    self_contained: true
+    self_contained: false
 editor_options: 
   chunk_output_type: console
 ---
@@ -217,4 +217,55 @@ gapminder %>%
     transition_time(year) +
     labs(title = "Year: {frame_time}")
 ```
+
+
+# Small Multiples {#gapminder-small-mulitples}
+
+```{r gapminder-small-multiple}
+library(gganimate)
+gapminder %>% 
+  count(continent, year) %>% 
+  filter(year == max(year))
+
+gapminder %>% 
+  filter(continent %in% "Americas") %>% 
+  ggplot(aes(x=year, y=lifeExp, group=country, color=country)) +
+    geom_point(aes(size=gdpPercap)) +
+    geom_line() +
+    facet_wrap(~country, ncol=2) +
+    scale_x_sqrt() +
+    theme(legend.position = "none") 
+```
+
+
+# Small Many - `trelliscopeJS` {#gapminder-small-many}
+
+```{r gapminder-small-many}
+library(trelliscopejs)
+
+## list-column dataset
+gapminder_nest <- gapminder %>% 
+  filter(continent == "Americas") %>% 
+  group_by(continent, country) %>% 
+  nest()
+
+## plotly graph function
+lifeExp_plot <- function(df) {
+    plot_ly(df, x = ~year, y = ~lifeExp) %>% 
+    add_markers() %>% 
+    add_lines()
+}
+
+## Generate trelliscopeJS interactive graph 
+gapminder_plot_df <- gapminder_nest %>% 
+  mutate(panel = map_plot(data, lifeExp_plot))
+
+trelliscope(gapminder_plot_df,
+            name = "gapminder", nrow = 2, ncol = 3,
+            state = list(labels = c("continent", "country", "lifeExp")),
+            path="gapminder_lifeExp")
+
+```
+
+
 
