@@ -1,7 +1,7 @@
 ---
 layout: page
 title: RStudio Trainer Program
-subtitle: "Tidyverse: Predictive Model - Concept Map"
+subtitle: "Tidyverse: Many Simple Models - Concept Map"
 author:
     name: xwMOOC
     url: https://www.facebook.com/groups/tidyverse/
